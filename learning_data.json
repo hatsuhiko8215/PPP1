@@ -1,0 +1,7 @@
+{
+    "parameters": {"weirdness": 0.5, "style_influence": 0.7},
+    "history": [],
+    "banned_keywords": ["castanets", "xylophone"],
+    "risky_keywords": {"lofi": "causes clutch noises"},
+    "successful_descriptors": ["warm analog texture", "vinyl crackle", "mellow beat"]
+}
