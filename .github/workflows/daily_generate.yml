@@ -25,7 +25,9 @@ jobs:
 
       - name: Run generation system
         env:
-          SUNO_COOKIE: ${{ secrets.SUNO_COOKIE }}
+          SUNO_AUTH_TOKEN: ${{ secrets.SUNO_AUTH_TOKEN }}
+          SUNO_BROWSER_TOKEN: ${{ secrets.SUNO_BROWSER_TOKEN }}
+          SUNO_DEVICE_ID: ${{ secrets.SUNO_DEVICE_ID }}
         run: |
           python main_system.py
 
