@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import json
 from datetime import datetime
@@ -7,14 +8,20 @@ from prompter import EnhancedPrompter
 from analyzer import MusicAnalyzer
 from repair_unit import SelfHealingAI
 
+print("=== Script started ===", flush=True)
+
 class LofiMusicSystem:
     def __init__(self):
         self.auth_token = os.getenv("SUNO_AUTH_TOKEN")
         self.browser_token = os.getenv("SUNO_BROWSER_TOKEN")
         self.device_id = os.getenv("SUNO_DEVICE_ID")
 
+        print(f"[DEBUG] auth_token present: {bool(self.auth_token)}", flush=True)
+        print(f"[DEBUG] browser_token present: {bool(self.browser_token)}", flush=True)
+        print(f"[DEBUG] device_id present: {bool(self.device_id)}", flush=True)
+
         if not all([self.auth_token, self.browser_token, self.device_id]):
-            print("Warning: Suno authentication environment variables are missing.")
+            print("Warning: Suno authentication environment variables are missing.", flush=True)
 
         self.suno = SunoAutoGenerator(self.auth_token, self.browser_token, self.device_id) if self.auth_token else None
         self.prompter = EnhancedPrompter()
@@ -26,7 +33,7 @@ class LofiMusicSystem:
         self.report_file = "daily_report.md"
 
     def run_daily_cycle(self):
-        print(f"Starting daily generation cycle at {datetime.now()}")
+        print(f"Starting daily generation cycle at {datetime.now()}", flush=True)
 
         if self.repair.check_health() != "OK":
             self.repair.handle_error("System health check failed at startup")
@@ -34,7 +41,7 @@ class LofiMusicSystem:
         generated_files = []
 
         for i in range(self.song_count):
-            print(f"\n--- Generating Song {i+1}/{self.song_count} ---")
+            print(f"\n--- Generating Song {i+1}/{self.song_count} ---", flush=True)
 
             try:
                 base_idea = (
@@ -48,14 +55,14 @@ class LofiMusicSystem:
                 title = self.prompter.generate_timestamp_title("CafeBGM")
 
                 if not self.suno:
-                    print("Suno engine not initialized. Skipping generation.")
+                    print("Suno engine not initialized. Skipping generation.", flush=True)
                     continue
 
                 generate_ids = self.suno.generate_song(style_tags, title, instrumental=True)
                 completed_songs = self.suno.wait_for_song_completion(generate_ids)
 
                 if not completed_songs:
-                    print(f"No songs completed for cycle {i+1}")
+                    print(f"No songs completed for cycle {i+1}", flush=True)
                     continue
 
                 for song in completed_songs:
@@ -64,7 +71,7 @@ class LofiMusicSystem:
 
                     audio_url = song.get("audio_url")
                     if not audio_url:
-                        print(f"No audio_url for song, skipping download")
+                        print(f"No audio_url for song, skipping download", flush=True)
                         continue
 
                     download_success = self.suno.download_song(audio_url, file_path)
@@ -86,13 +93,13 @@ class LofiMusicSystem:
                             "score": score,
                             "feedback": feedback
                         })
-                        print(f"Successfully generated and learned from: {timestamp_title}")
+                        print(f"Successfully generated and learned from: {timestamp_title}", flush=True)
                         break
                     else:
-                        print(f"Failed to download song: {timestamp_title}")
+                        print(f"Failed to download song: {timestamp_title}", flush=True)
 
             except Exception as e:
-                print(f"Error in cycle {i+1}: {e}")
+                print(f"Error in cycle {i+1}: {e}", flush=True)
                 self.repair.handle_error(e)
                 continue
 
@@ -110,3 +117,16 @@ class LofiMusicSystem:
             report_content += "| :--- | :--- | :--- |\n"
             for f in files:
                 report_content += f"| {f['title']} | {f['score']:.2f} | {f['feedback']} |\n"
+
+            report_content += "\n## 学習の進捗\n"
+            report_content += "システムは生成ごとにパラメータ（Weirdness, Style Influence）を調整し、スムースジャズBGM特有のクラッチ音・ノイズアーティファクトを最小限に抑えるプロンプトを学習しています。\n"
+
+        with open(self.report_file, "w", encoding="utf-8") as f:
+            f.write(report_content)
+        print(f"Report created: {self.report_file}", flush=True)
+
+if __name__ == "__main__":
+    print("=== Entering main block ===", flush=True)
+    system = LofiMusicSystem()
+    system.run_daily_cycle()
+    print("=== Script finished ===", flush=True)
