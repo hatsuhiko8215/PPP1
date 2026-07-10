@@ -15,17 +15,26 @@ class SunoAutoGenerator:
 
     def _make_request(self, method, endpoint, data=None, params=None, max_retries=5):
         url = f"{self.api_url}{endpoint}"
+        last_error = None
         for i in range(max_retries):
             try:
                 if method == "GET":
                     response = requests.get(url, headers=self.headers, params=params, timeout=30)
                 elif method == "POST":
                     response = requests.post(url, headers=self.headers, json=data, timeout=60)
+
+                print(f"[DEBUG] Status: {response.status_code}, Body: {response.text[:500]}")
+
                 response.raise_for_status()
                 return response.json()
+            except requests.exceptions.HTTPError:
+                last_error = f"HTTP {response.status_code}: {response.text[:500]}"
+                print(f"[DEBUG] Attempt {i+1} failed: {last_error}")
             except Exception as e:
-                time.sleep(2 ** i)
-        raise Exception(f"Failed to make request to {url}")
+                last_error = str(e)
+                print(f"[DEBUG] Attempt {i+1} failed: {last_error}")
+            time.sleep(2 ** i)
+        raise Exception(f"Failed to make request to {url}: {last_error}")
 
     def generate_song(self, prompt, tags="", instrumental=True):
         data = {
@@ -57,7 +66,8 @@ class SunoAutoGenerator:
         completed_songs = []
         while time.time() - start_time < timeout and len(completed_songs) < len(generate_ids):
             for song_id in generate_ids:
-                if song_id in [s["id"] for s in completed_songs]: continue
+                if song_id in [s["id"] for s in completed_songs]:
+                    continue
                 song_info = self.get_song_info(song_id)
                 if song_info and song_info.get("status") == "complete":
                     completed_songs.append(song_info)
