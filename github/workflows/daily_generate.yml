@@ -21,13 +21,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 librosa numpy
+          pip install requests beautifulsoup4
 
       - name: Run generation system
         env:
-          SUNO_COOKIE: ${{ secrets.SUNO_COOKIE }}
+          SUNO_AUTH_TOKEN: ${{ secrets.SUNO_AUTH_TOKEN }}
+          SUNO_BROWSER_TOKEN: ${{ secrets.SUNO_BROWSER_TOKEN }}
+          SUNO_DEVICE_ID: ${{ secrets.SUNO_DEVICE_ID }}
         run: |
           python main_system.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto-generated songs and updated learning data [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+          git pull origin main --rebase
+          git push origin main
 
       - name: Send Email Report
         if: always()
@@ -37,20 +48,11 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "【AI音楽生成】本日の生成レポート (${{ github.event.repository.updated_at }})"
+          subject: "【AI音楽生成】本日の生成レポート"
           to: hoshininegaiwo.ppp@gmail.com
           from: "AI Music Bot <${{ secrets.MAIL_USERNAME }}>"
           body: file://daily_report.md
           convert_markdown: true
-
-      - name: Commit and push changes
-        if: success()
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Auto-generated songs and updated learning data [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
-          git push origin main
 
       - name: Clean up old songs (older than 1 day)
         if: success()
