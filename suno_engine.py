@@ -4,6 +4,46 @@ import json
 import os
 import uuid
 
+CLERK_API_VERSION = "2025-11-10"
+CLERK_JS_VERSION = "5.117.0"
+
+
+def refresh_auth_token(client_cookie_value):
+    """__clientクッキーの値から新しいAuthorizationトークン(JWT)を取得する"""
+    base_headers = {
+        "Cookie": f"__client={client_cookie_value}",
+        "Origin": "https://suno.com",
+        "Referer": "https://suno.com/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    }
+    params = {
+        "__clerk_api_version": CLERK_API_VERSION,
+        "_clerk_js_version": CLERK_JS_VERSION,
+    }
+
+    client_url = "https://auth.suno.com/v1/client"
+    client_resp = requests.get(client_url, headers=base_headers, params=params, timeout=30)
+    print(f"[DEBUG] refresh_auth_token /client status: {client_resp.status_code}", flush=True)
+    client_resp.raise_for_status()
+    client_data = client_resp.json()["response"]
+
+    session_id = client_data.get("last_active_session_id")
+    if not session_id:
+        raise Exception("No active session_id found from Clerk client response")
+
+    token_url = f"https://auth.suno.com/v1/client/sessions/{session_id}/tokens"
+    token_resp = requests.post(token_url, headers=base_headers, params=params, timeout=30)
+    print(f"[DEBUG] refresh_auth_token /tokens status: {token_resp.status_code}", flush=True)
+    token_resp.raise_for_status()
+    token_data = token_resp.json()
+
+    jwt = token_data.get("jwt")
+    if not jwt:
+        raise Exception(f"No jwt found in token response: {token_data}")
+
+    return jwt
+
+
 class SunoAutoGenerator:
     def __init__(self, auth_token, browser_token, device_id):
         self.api_url = "https://studio-api-prod.suno.com"
@@ -27,15 +67,15 @@ class SunoAutoGenerator:
                 elif method == "POST":
                     response = requests.post(url, headers=self.headers, json=data, timeout=60)
 
-                print(f"[DEBUG] Status: {response.status_code}, Body: {response.text[:500]}")
+                print(f"[DEBUG] Status: {response.status_code}, Body: {response.text[:500]}", flush=True)
                 response.raise_for_status()
                 return response.json()
             except requests.exceptions.HTTPError:
                 last_error = f"HTTP {response.status_code}: {response.text[:500]}"
-                print(f"[DEBUG] Attempt {i+1} failed: {last_error}")
+                print(f"[DEBUG] Attempt {i+1} failed: {last_error}", flush=True)
             except Exception as e:
                 last_error = str(e)
-                print(f"[DEBUG] Attempt {i+1} failed: {last_error}")
+                print(f"[DEBUG] Attempt {i+1} failed: {last_error}", flush=True)
             time.sleep(2 ** i)
         raise Exception(f"Failed to make request to {url}: {last_error}")
 
