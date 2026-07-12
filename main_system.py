@@ -3,7 +3,7 @@ import sys
 import time
 import json
 from datetime import datetime
-from suno_engine import SunoAutoGenerator
+from suno_engine import SunoAutoGenerator, refresh_auth_token
 from prompter import EnhancedPrompter
 from analyzer import MusicAnalyzer
 from repair_unit import SelfHealingAI
@@ -12,18 +12,25 @@ print("=== Script started ===", flush=True)
 
 class LofiMusicSystem:
     def __init__(self):
-        self.auth_token = os.getenv("SUNO_AUTH_TOKEN")
+        self.client_token = os.getenv("SUNO_CLIENT_TOKEN")
         self.browser_token = os.getenv("SUNO_BROWSER_TOKEN")
         self.device_id = os.getenv("SUNO_DEVICE_ID")
 
-        print(f"[DEBUG] auth_token present: {bool(self.auth_token)}", flush=True)
+        print(f"[DEBUG] client_token present: {bool(self.client_token)}", flush=True)
         print(f"[DEBUG] browser_token present: {bool(self.browser_token)}", flush=True)
         print(f"[DEBUG] device_id present: {bool(self.device_id)}", flush=True)
 
-        if not all([self.auth_token, self.browser_token, self.device_id]):
+        self.suno = None
+        if self.client_token and self.browser_token and self.device_id:
+            try:
+                fresh_auth_token = refresh_auth_token(self.client_token)
+                print(f"[DEBUG] Successfully refreshed auth token", flush=True)
+                self.suno = SunoAutoGenerator(fresh_auth_token, self.browser_token, self.device_id)
+            except Exception as e:
+                print(f"[DEBUG] Failed to refresh auth token: {e}", flush=True)
+        else:
             print("Warning: Suno authentication environment variables are missing.", flush=True)
 
-        self.suno = SunoAutoGenerator(self.auth_token, self.browser_token, self.device_id) if self.auth_token else None
         self.prompter = EnhancedPrompter()
         self.analyzer = MusicAnalyzer()
         self.repair = SelfHealingAI()
