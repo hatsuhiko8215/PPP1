@@ -9,6 +9,7 @@ from analyzer import MusicAnalyzer
 from repair_unit import SelfHealingAI
 
 print("=== Script started ===", flush=True)
+print(f"[DEBUG] All SUNO env vars: {[k for k in os.environ if 'SUNO' in k]}", flush=True)
 
 class LofiMusicSystem:
     def __init__(self):
