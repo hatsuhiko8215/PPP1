@@ -1,7 +1,74 @@
 {
-    "parameters": {"weirdness": 0.5, "style_influence": 0.7},
-    "history": [],
-    "banned_keywords": ["castanets", "xylophone"],
-    "risky_keywords": {"lofi": "causes clutch noises"},
-    "successful_descriptors": ["warm analog texture", "vinyl crackle", "mellow beat"]
+    "parameters": {
+        "weirdness": 0.5,
+        "style_influence": 0.7
+    },
+    "history": [
+        {
+            "timestamp": "2026-07-17T22:45:41.227953",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        },
+        {
+            "timestamp": "2026-07-17T22:46:50.670507",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        },
+        {
+            "timestamp": "2026-07-17T22:52:50.917581",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        },
+        {
+            "timestamp": "2026-07-17T22:55:09.392235",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        },
+        {
+            "timestamp": "2026-07-17T22:58:20.154332",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        },
+        {
+            "timestamp": "2026-07-17T23:00:03.671456",
+            "score": 0.8,
+            "params": {
+                "weirdness": 0.5,
+                "style_influence": 0.7
+            },
+            "feedback": "Good quality, no major issues detected."
+        }
+    ],
+    "banned_keywords": [
+        "castanets",
+        "xylophone"
+    ],
+    "risky_keywords": {
+        "lofi": "causes clutch noises"
+    },
+    "successful_descriptors": [
+        "warm analog texture",
+        "vinyl crackle",
+        "mellow beat"
+    ]
 }
